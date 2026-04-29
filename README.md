@@ -102,4 +102,4 @@ v0.1 — manual triage + report template
 
 ---
 
-**Next step:** paste this into a new public repo called `artifact-readiness-engine`.
+This repo is intentionally minimal at v0.1.
