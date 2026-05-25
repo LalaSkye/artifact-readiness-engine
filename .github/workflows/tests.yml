@@ -33,3 +33,7 @@ jobs:
         artifact-readiness validate examples/pass/minimal-refusal-receipt.json
         artifact-readiness validate examples/hold/missing-receipt.json
         artifact-readiness validate examples/fail/overbroad-claim.json
+
+    - name: Check golden inspection reports
+      run: |
+        python scripts/generate_reports.py --check
