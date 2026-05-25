@@ -1,7 +1,7 @@
 """Golden report stability tests.
 
 These tests make the receipt registry self-verifying:
-- every canonical example must have a pinned JSON report
+- every canonical example in the manifest must have a pinned JSON report
 - live inspection output must exactly match the pinned report
 """
 from __future__ import annotations
@@ -14,34 +14,33 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-
-CASES = [
-    (
-        ROOT / "examples/pass/minimal-refusal-receipt.json",
-        ROOT / "examples/reports/pass-minimal-refusal-receipt.report.json",
-        "PASS",
-    ),
-    (
-        ROOT / "examples/hold/missing-receipt.json",
-        ROOT / "examples/reports/hold-missing-receipt.report.json",
-        "HOLD",
-    ),
-    (
-        ROOT / "examples/fail/overbroad-claim.json",
-        ROOT / "examples/reports/fail-overbroad-claim.report.json",
-        "FAIL",
-    ),
-]
+MANIFEST_PATH = ROOT / "examples" / "manifest.json"
 
 
-@pytest.mark.parametrize("example_path,report_path,expected_status", CASES)
-def test_golden_report_file_exists(example_path: Path, report_path: Path, expected_status: str):
-    assert example_path.exists(), f"Missing canonical example: {example_path}"
-    assert report_path.exists(), f"Missing golden report for {expected_status}: {report_path}"
+def load_cases() -> list[tuple[Path, Path, str, str]]:
+    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    return [
+        (
+            ROOT / entry["path"],
+            ROOT / entry["report_path"],
+            entry["expected_status"],
+            entry["id"],
+        )
+        for entry in manifest["examples"]
+    ]
 
 
-@pytest.mark.parametrize("example_path,report_path,expected_status", CASES)
-def test_live_cli_report_matches_golden_snapshot(example_path: Path, report_path: Path, expected_status: str):
+CASES = load_cases()
+
+
+@pytest.mark.parametrize("example_path,report_path,expected_status,case_id", CASES)
+def test_golden_report_file_exists(example_path: Path, report_path: Path, expected_status: str, case_id: str):
+    assert example_path.exists(), f"Missing canonical example {case_id}: {example_path}"
+    assert report_path.exists(), f"Missing golden report for {case_id}/{expected_status}: {report_path}"
+
+
+@pytest.mark.parametrize("example_path,report_path,expected_status,case_id", CASES)
+def test_live_cli_report_matches_golden_snapshot(example_path: Path, report_path: Path, expected_status: str, case_id: str):
     completed = subprocess.run(
         [
             sys.executable,
@@ -66,11 +65,11 @@ def test_live_cli_report_matches_golden_snapshot(example_path: Path, report_path
     live = json.loads(completed.stdout)
     golden = json.loads(report_path.read_text(encoding="utf-8"))
 
-    assert live == golden
+    assert live == golden, f"Golden report mismatch for {case_id}"
 
 
-@pytest.mark.parametrize("example_path,report_path,expected_status", CASES)
-def test_golden_report_core_surfaces(example_path: Path, report_path: Path, expected_status: str):
+@pytest.mark.parametrize("example_path,report_path,expected_status,case_id", CASES)
+def test_golden_report_core_surfaces(example_path: Path, report_path: Path, expected_status: str, case_id: str):
     report = json.loads(report_path.read_text(encoding="utf-8"))
 
     assert report["status"] == expected_status
