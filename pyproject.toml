@@ -10,7 +10,9 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 keywords = ["governance", "ai", "proof", "inspection", "alviantech"]
-dependencies = []
+dependencies = [
+  "jsonschema>=4.22"
+]
 
 [project.scripts]
 artifact-readiness = "artifact_readiness_engine.cli:main"
