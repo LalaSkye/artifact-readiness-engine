@@ -16,6 +16,7 @@ Current state:
 - PASS / HOLD / FAIL examples exist.
 - Deterministic inspection surfaces exist.
 - Schema validation runs before scoring.
+- Evidence model documented in `docs/EVIDENCE_MODEL.md`.
 
 Next milestone:
 
@@ -65,10 +66,10 @@ Current state:
 
 - The engine can show structural inspectability.
 - It cannot certify compliance, safety, legality, or production readiness.
+- `docs/EVIDENCE_MODEL.md` describes what each score proves and does not prove.
 
 Next milestone:
 
-- Add `docs/EVIDENCE_MODEL.md` describing what each score proves and does not prove.
 - Add `docs/EU_AI_ACT_MAPPING.md` as a claim-bounded structural map, not a compliance claim.
 
 ---
