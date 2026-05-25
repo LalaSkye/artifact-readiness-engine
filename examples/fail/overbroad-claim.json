@@ -2,8 +2,10 @@
   "claim_id": "broad-001",
   "claim_type": "documentation",
   "claim": {
-    "text": "This system is fully compliant, secure, and trusted for all production use cases.",
-    "limits": []
+    "text": "This system is fully compliant and secure for all production use cases.",
+    "limits": [
+      "This example is intentionally overbroad and should fail because the evidence is missing."
+    ]
   },
   "object": {
     "id": "system-v1",
