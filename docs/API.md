@@ -3,6 +3,11 @@
 Status: v0.2.0  
 Scope: public CLI and Python API for Artifact Readiness Engine.
 
+Related documents:
+
+- [Changelog](CHANGELOG.md)
+- [Roadmap](ROADMAP.md)
+
 This document is the human-readable contract for the public surface.
 
 The engine does not certify compliance, safety, legality, production readiness, or EU AI Act conformity.
@@ -210,6 +215,7 @@ Any change to this public surface should update:
 - `pyproject.toml`
 - `tests/test_public_api.py`
 - this document
+- `docs/CHANGELOG.md`
 
 ---
 
