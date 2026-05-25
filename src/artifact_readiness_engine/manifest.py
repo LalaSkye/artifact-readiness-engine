@@ -81,3 +81,28 @@ def assert_manifest_valid(path: str | Path = "examples/manifest.json", root: str
     if errors:
         raise ManifestError("Manifest integrity check failed:\n" + "\n".join(f"- {error}" for error in errors))
     return entries
+
+
+def find_manifest_entry(entry_id: str, path: str | Path = "examples/manifest.json") -> ManifestEntry:
+    """Return a manifest entry by id, or raise ManifestError."""
+    entries = load_manifest(path)
+    for entry in entries:
+        if entry.id == entry_id:
+            return entry
+    known = ", ".join(entry.id for entry in entries) or "<none>"
+    raise ManifestError(f"Unknown manifest id: @{entry_id}. Known ids: {known}")
+
+
+def resolve_proof_pack_reference(reference: str, path: str | Path = "examples/manifest.json") -> str:
+    """Resolve either a normal file path or an @manifest-id reference.
+
+    Examples:
+        examples/pass/minimal-refusal-receipt.json -> same path
+        @pass-minimal-refusal-receipt -> examples/pass/minimal-refusal-receipt.json
+    """
+    if not reference.startswith("@"):
+        return reference
+    entry_id = reference[1:]
+    if not entry_id:
+        raise ManifestError("Manifest reference '@' is missing an id.")
+    return find_manifest_entry(entry_id, path=path).path
