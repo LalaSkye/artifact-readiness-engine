@@ -70,6 +70,35 @@ validate = file is structurally valid
 inspect = proof strength is evaluated
 ```
 
+### Verify Report
+
+Verify that a report JSON file carries a valid `report_digest`.
+
+```bash
+artifact-readiness verify-report examples/reports/pass-minimal-refusal-receipt.report.json
+artifact-readiness verify-report examples/reports/hold-missing-receipt.report.json --format json
+```
+
+The digest is computed over canonical JSON excluding the `report_digest` field itself.
+
+Exit behaviour:
+
+- `0` when the stored digest verifies
+- `1` when the stored digest mismatches
+- `2` for file, parsing, or runtime errors
+
+JSON output shape:
+
+```json
+{
+  "file": "examples/reports/pass-minimal-refusal-receipt.report.json",
+  "valid": true,
+  "algorithm": "sha256",
+  "expected": "<stored-sha256>",
+  "actual": "<computed-sha256>"
+}
+```
+
 ### Manifest
 
 List or check canonical example registry.
@@ -134,6 +163,7 @@ Returns a deterministic report dictionary with fields including:
 - `passing_surfaces`
 - `issues`
 - `strongest_supported_claim`
+- `report_digest` for generated golden reports
 
 ### `inspect_by_id(entry_id) -> dict`
 
@@ -241,7 +271,7 @@ Each example has a pinned report under:
 examples/reports/*.report.json
 ```
 
-Golden reports are checked in CI.
+Golden reports carry a self-verifying `report_digest` and are checked in CI.
 
 To regenerate:
 
@@ -253,6 +283,7 @@ To verify:
 
 ```bash
 python scripts/generate_reports.py --check
+artifact-readiness verify-report examples/reports/pass-minimal-refusal-receipt.report.json
 ```
 
 ---
@@ -276,6 +307,14 @@ Schema failure:
 ```text
 Proof pack failed schema validation:
 - <field>: <reason>
+```
+
+Digest mismatch:
+
+```text
+FAIL: <path> report_digest mismatch.
+expected: <stored-sha256>
+actual  : <computed-sha256>
 ```
 
 Inspection statuses:
