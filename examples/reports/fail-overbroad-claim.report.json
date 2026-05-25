@@ -74,5 +74,10 @@
     "evidence_fit": "Evidence array is missing or empty.",
     "receipt_quality": "No receipt block found."
   },
-  "strongest_supported_claim": "Evidence currently supports only these surfaces: claim_boundedness, object_clarity, replayability, downstream_effect, claim_limits. Surfaces that did not pass are not supported by this proof pack in its current state."
+  "strongest_supported_claim": "Evidence currently supports only these surfaces: claim_boundedness, object_clarity, replayability, downstream_effect, claim_limits. Surfaces that did not pass are not supported by this proof pack in its current state.",
+  "report_digest": {
+    "algorithm": "sha256",
+    "canonicalization": "json.dumps(sort_keys=True,separators=(',',':'),ensure_ascii=False) excluding report_digest",
+    "value": "fe218799e916d762458c6a4e551e83553dcf14ccb12538eadd98d281100f9f7b"
+  }
 }
