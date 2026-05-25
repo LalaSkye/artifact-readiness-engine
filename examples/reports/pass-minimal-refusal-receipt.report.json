@@ -1,0 +1,109 @@
+{
+  "file": "examples/pass/minimal-refusal-receipt.json",
+  "status": "PASS",
+  "claim_id": "refusal-001",
+  "claim_type": "refusal",
+  "stated_claim": "The system refused a downstream mutation before binding, and this refusal was recorded.",
+  "claim_limits": [
+    "Applies only to this specific mutation event on 2025-05-01",
+    "Does not claim system-wide refusal behaviour",
+    "Does not claim EU compliance"
+  ],
+  "object": "A downstream mutation request rejected by the HOLD gate at pre-binding stage.",
+  "authority": {
+    "type": "policy",
+    "reference": "ALVIANTECH-POLICY-v1.1-section-3"
+  },
+  "conditions": [
+    {
+      "id": "condition-01",
+      "description": "Mutation request was received before binding.",
+      "result": "confirmed"
+    },
+    {
+      "id": "condition-02",
+      "description": "HOLD gate was active at time of request.",
+      "result": "confirmed"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evidence-01",
+      "type": "log",
+      "reference": "system-log-2025-05-01T10:22:00Z",
+      "supports_claim": true
+    },
+    {
+      "id": "evidence-02",
+      "type": "policy_evaluation_trace",
+      "reference": "eval-trace-2025-05-01-001",
+      "supports_claim": true
+    }
+  ],
+  "receipt": {
+    "present": true,
+    "type": "refusal_receipt",
+    "reference": "receipt-2025-05-01-001",
+    "timestamp": "2025-05-01T10:22:01Z"
+  },
+  "replay": {
+    "present": true,
+    "fixture": "tests/fixtures/refusal-001-replay.json",
+    "notes": "Replay fixture reproduces the pre-binding HOLD condition."
+  },
+  "downstream_effect": {
+    "status": "blocked",
+    "description": "No downstream mutation occurred. Path confirmed closed."
+  },
+  "scores": {
+    "claim_boundedness": {
+      "result": "PASS",
+      "note": "Claim text is present and limits are declared."
+    },
+    "object_clarity": {
+      "result": "PASS",
+      "note": "Object is identified."
+    },
+    "authority_trace": {
+      "result": "PASS",
+      "note": "Authority type and reference are present."
+    },
+    "condition_clarity": {
+      "result": "PASS",
+      "note": "All conditions have known results."
+    },
+    "evidence_fit": {
+      "result": "PASS",
+      "note": "Evidence array is present and all items support the claim."
+    },
+    "receipt_quality": {
+      "result": "PASS",
+      "note": "Receipt is present with a valid reference."
+    },
+    "replayability": {
+      "result": "PASS",
+      "note": "Replay surface is declared."
+    },
+    "downstream_effect": {
+      "result": "PASS",
+      "note": "Downstream effect is marked blocked."
+    },
+    "claim_limits": {
+      "result": "PASS",
+      "note": "Claim limits are declared."
+    }
+  },
+  "passing_surfaces": [
+    "claim_boundedness",
+    "object_clarity",
+    "authority_trace",
+    "condition_clarity",
+    "evidence_fit",
+    "receipt_quality",
+    "replayability",
+    "downstream_effect",
+    "claim_limits"
+  ],
+  "issues": {},
+  "strongest_supported_claim": "The proof pack structurally supports the stated refusal claim: The system refused a downstream mutation before binding, and this refusal was recorded."
+}
