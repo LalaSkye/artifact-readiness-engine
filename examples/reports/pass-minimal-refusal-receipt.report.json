@@ -105,5 +105,10 @@
     "claim_limits"
   ],
   "issues": {},
-  "strongest_supported_claim": "The proof pack structurally supports the stated refusal claim: The system refused a downstream mutation before binding, and this refusal was recorded."
+  "strongest_supported_claim": "The proof pack structurally supports the stated refusal claim: The system refused a downstream mutation before binding, and this refusal was recorded.",
+  "report_digest": {
+    "algorithm": "sha256",
+    "canonicalization": "json.dumps(sort_keys=True,separators=(',',':'),ensure_ascii=False) excluding report_digest",
+    "value": "ca1c7858e9a7fd451d192ce97169c4405629b4dc00f7a23b9a4ca895973ecc79"
+  }
 }
