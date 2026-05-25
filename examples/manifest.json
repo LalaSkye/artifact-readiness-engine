@@ -1,0 +1,27 @@
+{
+  "version": "0.1",
+  "description": "Canonical proof-pack examples used for validation, inspection, golden report generation, and regression testing.",
+  "examples": [
+    {
+      "id": "pass-minimal-refusal-receipt",
+      "path": "examples/pass/minimal-refusal-receipt.json",
+      "report_path": "examples/reports/pass-minimal-refusal-receipt.report.json",
+      "expected_status": "PASS",
+      "tags": ["refusal", "receipt", "downstream-blocked", "replayable"]
+    },
+    {
+      "id": "hold-missing-receipt",
+      "path": "examples/hold/missing-receipt.json",
+      "report_path": "examples/reports/hold-missing-receipt.report.json",
+      "expected_status": "HOLD",
+      "tags": ["refusal", "missing-receipt", "missing-replay", "downstream-unknown"]
+    },
+    {
+      "id": "fail-overbroad-claim",
+      "path": "examples/fail/overbroad-claim.json",
+      "report_path": "examples/reports/fail-overbroad-claim.report.json",
+      "expected_status": "FAIL",
+      "tags": ["documentation", "overbroad-claim", "missing-evidence", "unknown-authority"]
+    }
+  ]
+}
