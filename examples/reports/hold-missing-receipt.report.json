@@ -1,0 +1,104 @@
+{
+  "file": "examples/hold/missing-receipt.json",
+  "status": "HOLD",
+  "claim_id": "refusal-hold-001",
+  "claim_type": "refusal",
+  "stated_claim": "The requested action was refused before downstream consequence could bind.",
+  "claim_limits": [
+    "Applies only to event-001 in the test environment.",
+    "Does not prove EU AI Act compliance.",
+    "Does not prove system-wide refusal behaviour."
+  ],
+  "object": "A request attempted to move from advisory output to executable action.",
+  "authority": {
+    "type": "policy",
+    "reference": "policy://execution-boundary/v0.1"
+  },
+  "conditions": [
+    {
+      "id": "condition-01",
+      "description": "Requester has approved execution role.",
+      "result": "fail"
+    },
+    {
+      "id": "condition-02",
+      "description": "Destination is within approved scope.",
+      "result": "unknown"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evidence-01",
+      "type": "log",
+      "reference": "log://event-001/auth-check",
+      "supports_claim": true
+    }
+  ],
+  "receipt": {
+    "present": false,
+    "type": "none",
+    "reference": "",
+    "timestamp": ""
+  },
+  "replay": {
+    "present": false,
+    "fixture": "",
+    "notes": "Missing receipt showing refusal event, downstream route status, and policy evaluation trace."
+  },
+  "downstream_effect": {
+    "status": "unknown",
+    "description": "No receipt or downstream route record proves that consequence was blocked."
+  },
+  "scores": {
+    "claim_boundedness": {
+      "result": "PASS",
+      "note": "Claim text is present and limits are declared."
+    },
+    "object_clarity": {
+      "result": "PASS",
+      "note": "Object is identified."
+    },
+    "authority_trace": {
+      "result": "PASS",
+      "note": "Authority type and reference are present."
+    },
+    "condition_clarity": {
+      "result": "HOLD",
+      "note": "Condition(s) with unknown result: condition-02."
+    },
+    "evidence_fit": {
+      "result": "PASS",
+      "note": "Evidence array is present and all items support the claim."
+    },
+    "receipt_quality": {
+      "result": "HOLD",
+      "note": "Receipt present=false on a refusal/interruption claim."
+    },
+    "replayability": {
+      "result": "HOLD",
+      "note": "Replay surface is absent or marked not present."
+    },
+    "downstream_effect": {
+      "result": "HOLD",
+      "note": "Downstream effect status is unknown; refusal effect is not proven."
+    },
+    "claim_limits": {
+      "result": "PASS",
+      "note": "Claim limits are declared."
+    }
+  },
+  "passing_surfaces": [
+    "claim_boundedness",
+    "object_clarity",
+    "authority_trace",
+    "evidence_fit",
+    "claim_limits"
+  ],
+  "issues": {
+    "condition_clarity": "Condition(s) with unknown result: condition-02.",
+    "receipt_quality": "Receipt present=false on a refusal/interruption claim.",
+    "replayability": "Replay surface is absent or marked not present.",
+    "downstream_effect": "Downstream effect status is unknown; refusal effect is not proven."
+  },
+  "strongest_supported_claim": "Evidence currently supports only these surfaces: claim_boundedness, object_clarity, authority_trace, evidence_fit, claim_limits. Surfaces that did not pass are not supported by this proof pack in its current state."
+}
