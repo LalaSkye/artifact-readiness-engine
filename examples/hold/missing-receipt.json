@@ -1,57 +1,55 @@
 {
+  "claim_id": "refusal-hold-001",
+  "claim_type": "refusal",
   "claim": {
-    "statement": "The requested action was refused before downstream consequence could bind.",
-    "claim_type": "refusal",
-    "scope": "Single execution attempt in test environment"
+    "text": "The requested action was refused before downstream consequence could bind.",
+    "limits": [
+      "Applies only to event-001 in the test environment.",
+      "Does not prove EU AI Act compliance.",
+      "Does not prove system-wide refusal behaviour."
+    ]
   },
   "object": {
-    "object_type": "execution_attempt",
-    "identifier": "event-001",
+    "id": "event-001",
     "description": "A request attempted to move from advisory output to executable action."
   },
   "authority": {
-    "authority_type": "policy",
-    "authority_reference": "policy://execution-boundary/v0.1",
-    "approval_basis": "Action requires approved role and in-scope destination."
+    "type": "policy",
+    "reference": "policy://execution-boundary/v0.1"
   },
   "conditions": [
     {
-      "condition": "Requester has approved execution role",
-      "result": "fail",
-      "evidence_reference": "log://event-001/auth-check"
+      "id": "condition-01",
+      "description": "Requester has approved execution role.",
+      "result": "fail"
     },
     {
-      "condition": "Destination is within approved scope",
-      "result": "unknown",
-      "evidence_reference": ""
+      "id": "condition-02",
+      "description": "Destination is within approved scope.",
+      "result": "unknown"
     }
   ],
   "evidence": [
     {
-      "evidence_type": "log",
+      "id": "evidence-01",
+      "type": "log",
       "reference": "log://event-001/auth-check",
-      "description": "Log reports failed role check."
+      "supports_claim": true
     }
   ],
   "receipt": {
     "present": false,
-    "receipt_type": "none",
-    "timestamp": "",
+    "type": "none",
     "reference": "",
-    "downstream_effect_status": "unknown"
+    "timestamp": ""
   },
   "replay": {
-    "replayable": false,
-    "replay_reference": "",
-    "known_missing_inputs": [
-      "receipt showing refusal event",
-      "downstream route status",
-      "policy evaluation trace"
-    ]
+    "present": false,
+    "fixture": "",
+    "notes": "Missing receipt showing refusal event, downstream route status, and policy evaluation trace."
   },
-  "limits": [
-    "This example does not prove that consequence was blocked.",
-    "The available log only suggests an authority check failed.",
-    "Without a receipt or downstream status, the correct state is HOLD."
-  ]
+  "downstream_effect": {
+    "status": "unknown",
+    "description": "No receipt or downstream route record proves that consequence was blocked."
+  }
 }
