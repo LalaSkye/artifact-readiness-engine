@@ -1,5 +1,7 @@
 # Artifact Readiness Engine
 
+[![CI](https://github.com/LalaSkye/artifact-readiness-engine/actions/workflows/tests.yml/badge.svg)](https://github.com/LalaSkye/artifact-readiness-engine/actions/workflows/tests.yml)
+
 Artifact Readiness Engine checks whether an artefact is ready to support the claim attached to it.
 
 It currently has two inspection surfaces:
