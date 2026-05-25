@@ -1,46 +1,90 @@
 # Artifact Readiness Engine
 
-Turns messy GitHub repos into clean, runnable, auditable projects.
+Artifact Readiness Engine checks whether an artefact is ready to support the claim attached to it.
+
+It currently has two inspection surfaces:
+
+1. **Repo Readiness** — can a repository actually install, run, and be used?
+2. **Proof Structure Inspection Mode** — can a governance or AI-control artefact support a bounded proof claim?
 
 ---
 
-## What this does
+## Proof Structure Inspection Mode
 
-Most repos look finished.
+This mode is a pre-audit inspection surface.
 
-Many do not run.
+It does **not** certify compliance, safety, legality, production readiness, or EU AI Act conformity.
 
-This engine checks whether a repository can actually be used.
+It asks a smaller question:
 
-It does not guess.  
-It tests.
+> What exactly does this artefact prove, and what does it not prove?
 
----
-
-## Output
-
-A short, structured **Repo Readiness Report**:
+Core chain:
 
 ```text
-Status: HOLD
-
-Runability: FAIL  
-Build: FAIL  
-Docs: PARTIAL  
-Tests: MISSING  
-Security: REVIEW  
-
-Key issue:
-Install path is broken (dependency mismatch)
-
-Next action:
-Fix environment + dependency versions
-
-Estimated cleanup:
-3–5 hours
+Claim
+→ Object
+→ Authority
+→ Conditions
+→ Evidence
+→ Receipt
+→ Replay
+→ Downstream Effect
+→ Limit
 ```
 
-## What gets checked
+### Run
+
+```bash
+pip install -e .
+artifact-readiness inspect examples/pass/minimal-refusal-receipt.json
+artifact-readiness inspect examples/hold/missing-receipt.json --format json
+```
+
+### Output
+
+```text
+Status: PASS | HOLD | FAIL
+
+Scores:
+- claim_boundedness
+- object_clarity
+- authority_trace
+- condition_clarity
+- evidence_fit
+- receipt_quality
+- replayability
+- downstream_effect
+- claim_limits
+```
+
+### States
+
+- `PASS` — structurally inspectable for the attached bounded claim
+- `HOLD` — incomplete or ambiguous proof surface
+- `FAIL` — claim cannot be supported by the submitted artefact
+
+### Non-claims
+
+This project does not claim that an artefact is:
+
+- EU AI Act compliant
+- legally sufficient
+- independently audited
+- production safe
+- fully secure
+- court-ready
+- certified
+
+It only checks whether the submitted proof object can support the claim attached to it.
+
+---
+
+## Repo Readiness Mode
+
+The original repo-readiness surface checks whether a repository can actually be used.
+
+It asks:
 
 - Can the repo install?
 - Can it run?
@@ -49,30 +93,25 @@ Estimated cleanup:
 - Are tests present?
 - Are there obvious security risks?
 
-## Why it exists
+A short, structured **Repo Readiness Report** may look like:
 
-Most teams only discover problems after trying to use the repo.
+```text
+Status: HOLD
 
-This makes failure visible early.
+Runability: FAIL
+Build: FAIL
+Docs: PARTIAL
+Tests: MISSING
+Security: REVIEW
 
-Before time is wasted.
+Key issue:
+Install path is broken (dependency mismatch)
 
-## Use case
+Next action:
+Fix environment + dependency versions
+```
 
-- Founders with a product but messy repo
-- Teams preparing for demo, hiring, or funding
-- Anyone unsure if their repo actually works
-
-## Offer
-
-Fixed-price Repo Triage
-
-- Install + run attempt
-- Documentation check
-- Failure points identified
-- Clear fix plan
-
-You get a one-page report before any cleanup work begins.
+---
 
 ## Position
 
@@ -82,24 +121,14 @@ This is not static analysis.
 
 This is a readiness check at the execution boundary.
 
+---
+
 ## Status
 
-v0.1 — manual triage + report template
-
-## Next
-
-- Add example reports
-- Add checklist script
-- Add failing repo demo
+v0.1 — proof-structure inspection engine + manual repo-readiness concept.
 
 ---
 
-## Why this works
-- **Clear**
-- **Sellable**
-- **Immediate use case**
-- No fluff, no overbuild
+## Stop line
 
----
-
-This repo is intentionally minimal at v0.1.
+A proof object should prove the claim attached to it — not less, not everything.
