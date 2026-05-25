@@ -100,5 +100,10 @@
     "replayability": "Replay surface is absent or marked not present.",
     "downstream_effect": "Downstream effect status is unknown; refusal effect is not proven."
   },
-  "strongest_supported_claim": "Evidence currently supports only these surfaces: claim_boundedness, object_clarity, authority_trace, evidence_fit, claim_limits. Surfaces that did not pass are not supported by this proof pack in its current state."
+  "strongest_supported_claim": "Evidence currently supports only these surfaces: claim_boundedness, object_clarity, authority_trace, evidence_fit, claim_limits. Surfaces that did not pass are not supported by this proof pack in its current state.",
+  "report_digest": {
+    "algorithm": "sha256",
+    "canonicalization": "json.dumps(sort_keys=True,separators=(',',':'),ensure_ascii=False) excluding report_digest",
+    "value": "1a86dae36d09a55712bfbd2e9a986250e560ea718833534b1740de8ce9c756dd"
+  }
 }
