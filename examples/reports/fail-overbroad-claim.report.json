@@ -1,0 +1,78 @@
+{
+  "file": "examples/fail/overbroad-claim.json",
+  "status": "FAIL",
+  "claim_id": "broad-001",
+  "claim_type": "documentation",
+  "stated_claim": "This system is fully compliant and secure for all production use cases.",
+  "claim_limits": [
+    "This example is intentionally overbroad and should fail because the evidence is missing."
+  ],
+  "object": "Generic system description without specific scope.",
+  "authority": {
+    "type": "unknown",
+    "reference": ""
+  },
+  "conditions": [
+    {
+      "id": "condition-01",
+      "description": "System has been reviewed.",
+      "result": "unknown"
+    }
+  ],
+  "evidence": [],
+  "receipt": null,
+  "replay": null,
+  "downstream_effect": null,
+  "scores": {
+    "claim_boundedness": {
+      "result": "PASS",
+      "note": "Claim text is present and limits are declared."
+    },
+    "object_clarity": {
+      "result": "PASS",
+      "note": "Object is identified."
+    },
+    "authority_trace": {
+      "result": "HOLD",
+      "note": "Authority type is unknown."
+    },
+    "condition_clarity": {
+      "result": "HOLD",
+      "note": "Condition(s) with unknown result: condition-01."
+    },
+    "evidence_fit": {
+      "result": "FAIL",
+      "note": "Evidence array is missing or empty."
+    },
+    "receipt_quality": {
+      "result": "HOLD",
+      "note": "No receipt block found."
+    },
+    "replayability": {
+      "result": "PASS",
+      "note": "Replay not required for documentation claims."
+    },
+    "downstream_effect": {
+      "result": "PASS",
+      "note": "Downstream block is not required for this claim type."
+    },
+    "claim_limits": {
+      "result": "PASS",
+      "note": "Claim limits are declared."
+    }
+  },
+  "passing_surfaces": [
+    "claim_boundedness",
+    "object_clarity",
+    "replayability",
+    "downstream_effect",
+    "claim_limits"
+  ],
+  "issues": {
+    "authority_trace": "Authority type is unknown.",
+    "condition_clarity": "Condition(s) with unknown result: condition-01.",
+    "evidence_fit": "Evidence array is missing or empty.",
+    "receipt_quality": "No receipt block found."
+  },
+  "strongest_supported_claim": "Evidence currently supports only these surfaces: claim_boundedness, object_clarity, replayability, downstream_effect, claim_limits. Surfaces that did not pass are not supported by this proof pack in its current state."
+}
