@@ -1,0 +1,57 @@
+{
+  "claim": {
+    "statement": "The requested action was refused before downstream consequence could bind.",
+    "claim_type": "refusal",
+    "scope": "Single execution attempt in test environment"
+  },
+  "object": {
+    "object_type": "execution_attempt",
+    "identifier": "event-001",
+    "description": "A request attempted to move from advisory output to executable action."
+  },
+  "authority": {
+    "authority_type": "policy",
+    "authority_reference": "policy://execution-boundary/v0.1",
+    "approval_basis": "Action requires approved role and in-scope destination."
+  },
+  "conditions": [
+    {
+      "condition": "Requester has approved execution role",
+      "result": "fail",
+      "evidence_reference": "log://event-001/auth-check"
+    },
+    {
+      "condition": "Destination is within approved scope",
+      "result": "unknown",
+      "evidence_reference": ""
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_type": "log",
+      "reference": "log://event-001/auth-check",
+      "description": "Log reports failed role check."
+    }
+  ],
+  "receipt": {
+    "present": false,
+    "receipt_type": "none",
+    "timestamp": "",
+    "reference": "",
+    "downstream_effect_status": "unknown"
+  },
+  "replay": {
+    "replayable": false,
+    "replay_reference": "",
+    "known_missing_inputs": [
+      "receipt showing refusal event",
+      "downstream route status",
+      "policy evaluation trace"
+    ]
+  },
+  "limits": [
+    "This example does not prove that consequence was blocked.",
+    "The available log only suggests an authority check failed.",
+    "Without a receipt or downstream status, the correct state is HOLD."
+  ]
+}
