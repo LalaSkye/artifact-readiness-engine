@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from .inspector import inspect_file
+from .manifest import ManifestError, assert_manifest_valid, load_manifest
 from .report import format_json, format_text
 from .validation import validate_proof_pack
 
@@ -29,6 +30,19 @@ def main() -> None:
 
     validate_cmd = sub.add_parser("validate", help="Validate proof-pack JSON against the canonical schema.")
     validate_cmd.add_argument("file", help="Path to proof-pack JSON")
+
+    manifest_cmd = sub.add_parser("manifest", help="Inspect the canonical examples manifest.")
+    manifest_cmd.add_argument(
+        "--check",
+        action="store_true",
+        help="Run manifest integrity checks.",
+    )
+    manifest_cmd.add_argument(
+        "--format",
+        choices=["text", "json"],
+        default="text",
+        help="Output format for manifest listing (default: text).",
+    )
 
     args = parser.parse_args()
 
@@ -58,6 +72,28 @@ def main() -> None:
             sys.exit(2)
 
         print(f"PASS: {args.file} matches the canonical proof-pack schema.")
+        sys.exit(0)
+
+    if args.command == "manifest":
+        try:
+            entries = assert_manifest_valid() if args.check else load_manifest()
+        except FileNotFoundError:
+            print("Error: examples/manifest.json not found", file=sys.stderr)
+            sys.exit(2)
+        except ManifestError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            sys.exit(1)
+        except Exception as exc:  # noqa: BLE001
+            print(f"Error: {exc}", file=sys.stderr)
+            sys.exit(2)
+
+        if args.format == "json":
+            print(json.dumps([entry.__dict__ for entry in entries], indent=2))
+        else:
+            if args.check:
+                print("PASS: examples/manifest.json passed integrity checks.")
+            for entry in entries:
+                print(f"{entry.expected_status:<4} {entry.id} :: {entry.path}")
         sys.exit(0)
 
 
