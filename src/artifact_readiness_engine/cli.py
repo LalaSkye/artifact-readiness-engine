@@ -7,7 +7,12 @@ import sys
 from pathlib import Path
 
 from .inspector import inspect_file
-from .manifest import ManifestError, assert_manifest_valid, load_manifest
+from .manifest import (
+    ManifestError,
+    assert_manifest_valid,
+    load_manifest,
+    resolve_proof_pack_reference,
+)
 from .report import format_json, format_text
 from .validation import validate_proof_pack
 
@@ -19,8 +24,8 @@ def main() -> None:
     )
     sub = parser.add_subparsers(dest="command", required=True)
 
-    inspect_cmd = sub.add_parser("inspect", help="Inspect a proof-pack JSON file.")
-    inspect_cmd.add_argument("file", help="Path to proof-pack JSON")
+    inspect_cmd = sub.add_parser("inspect", help="Inspect a proof-pack JSON file or @manifest-id.")
+    inspect_cmd.add_argument("file", help="Path to proof-pack JSON, or @id from examples/manifest.json")
     inspect_cmd.add_argument(
         "--format",
         choices=["text", "json"],
@@ -28,8 +33,8 @@ def main() -> None:
         help="Output format (default: text)",
     )
 
-    validate_cmd = sub.add_parser("validate", help="Validate proof-pack JSON against the canonical schema.")
-    validate_cmd.add_argument("file", help="Path to proof-pack JSON")
+    validate_cmd = sub.add_parser("validate", help="Validate proof-pack JSON or @manifest-id against the canonical schema.")
+    validate_cmd.add_argument("file", help="Path to proof-pack JSON, or @id from examples/manifest.json")
 
     manifest_cmd = sub.add_parser("manifest", help="Inspect the canonical examples manifest.")
     manifest_cmd.add_argument(
@@ -48,9 +53,13 @@ def main() -> None:
 
     if args.command == "inspect":
         try:
-            result = inspect_file(args.file)
+            resolved_file = resolve_proof_pack_reference(args.file)
+            result = inspect_file(resolved_file)
         except FileNotFoundError:
             print(f"Error: file not found — {args.file}", file=sys.stderr)
+            sys.exit(2)
+        except ManifestError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
             sys.exit(2)
         except Exception as exc:  # noqa: BLE001
             print(f"Error: {exc}", file=sys.stderr)
@@ -62,16 +71,20 @@ def main() -> None:
 
     if args.command == "validate":
         try:
-            data = json.loads(Path(args.file).read_text(encoding="utf-8"))
+            resolved_file = resolve_proof_pack_reference(args.file)
+            data = json.loads(Path(resolved_file).read_text(encoding="utf-8"))
             validate_proof_pack(data)
         except FileNotFoundError:
             print(f"Error: file not found — {args.file}", file=sys.stderr)
+            sys.exit(2)
+        except ManifestError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
             sys.exit(2)
         except Exception as exc:  # noqa: BLE001
             print(f"Error: {exc}", file=sys.stderr)
             sys.exit(2)
 
-        print(f"PASS: {args.file} matches the canonical proof-pack schema.")
+        print(f"PASS: {resolved_file} matches the canonical proof-pack schema.")
         sys.exit(0)
 
     if args.command == "manifest":
@@ -93,7 +106,7 @@ def main() -> None:
             if args.check:
                 print("PASS: examples/manifest.json passed integrity checks.")
             for entry in entries:
-                print(f"{entry.expected_status:<4} {entry.id} :: {entry.path}")
+                print(f"{entry.expected_status:<4} @{entry.id} :: {entry.path}")
         sys.exit(0)
 
 
