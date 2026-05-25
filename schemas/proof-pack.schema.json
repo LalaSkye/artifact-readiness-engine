@@ -2,66 +2,96 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/LalaSkye/artifact-readiness-engine/schemas/proof-pack.schema.json",
   "title": "Proof Pack",
-  "description": "Minimal structure for inspecting whether an artefact can support a bounded governance or AI-control claim.",
+  "description": "Canonical v0.1 proof-pack format for inspecting whether an artefact can support a bounded governance or AI-control claim.",
   "type": "object",
   "required": [
+    "claim_id",
+    "claim_type",
     "claim",
     "object",
     "authority",
     "conditions",
     "evidence",
     "receipt",
-    "limits"
+    "replay",
+    "downstream_effect"
   ],
   "properties": {
+    "claim_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claim_type": {
+      "type": "string",
+      "enum": ["allow", "refusal", "interruption", "audit", "documentation", "observation", "other"]
+    },
     "claim": {
       "type": "object",
-      "required": ["statement", "claim_type"],
+      "required": ["text", "limits"],
       "properties": {
-        "statement": { "type": "string", "minLength": 1 },
-        "claim_type": {
+        "text": {
           "type": "string",
-          "enum": ["allow", "refusal", "interruption", "audit", "documentation", "other"]
+          "minLength": 1
         },
-        "scope": { "type": "string" }
+        "limits": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
       },
       "additionalProperties": false
     },
     "object": {
       "type": "object",
-      "required": ["object_type", "identifier"],
+      "required": ["id", "description"],
       "properties": {
-        "object_type": {
+        "id": {
           "type": "string",
-          "enum": ["request", "decision", "transition", "refusal", "receipt", "audit_event", "execution_attempt", "other"]
+          "minLength": 1
         },
-        "identifier": { "type": "string", "minLength": 1 },
-        "description": { "type": "string" }
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
       },
       "additionalProperties": false
     },
     "authority": {
       "type": "object",
-      "required": ["authority_type", "authority_reference"],
+      "required": ["type", "reference"],
       "properties": {
-        "authority_type": {
+        "type": {
           "type": "string",
           "enum": ["human", "role", "policy", "system", "hybrid", "unknown"]
         },
-        "authority_reference": { "type": "string", "minLength": 1 },
-        "approval_basis": { "type": "string" }
+        "reference": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "conditions": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["condition", "result"],
+        "required": ["id", "description", "result"],
         "properties": {
-          "condition": { "type": "string", "minLength": 1 },
-          "result": { "type": "string", "enum": ["pass", "fail", "unknown"] },
-          "evidence_reference": { "type": "string" }
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "result": {
+            "type": "string",
+            "enum": ["confirmed", "pass", "fail", "unknown"]
+          }
         },
         "additionalProperties": false
       }
@@ -70,52 +100,76 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["evidence_type", "reference"],
+        "required": ["id", "type", "reference", "supports_claim"],
         "properties": {
-          "evidence_type": {
+          "id": {
             "type": "string",
-            "enum": ["log", "receipt", "screenshot", "policy", "test", "hash", "audit_note", "other"]
+            "minLength": 1
           },
-          "reference": { "type": "string", "minLength": 1 },
-          "description": { "type": "string" }
+          "type": {
+            "type": "string",
+            "enum": ["log", "receipt", "screenshot", "policy", "test", "hash", "audit_note", "policy_evaluation_trace", "decision_log", "evaluation_trace", "other"]
+          },
+          "reference": {
+            "type": "string",
+            "minLength": 1
+          },
+          "supports_claim": {
+            "type": "boolean"
+          }
         },
         "additionalProperties": false
       }
     },
     "receipt": {
-      "type": "object",
-      "required": ["present", "receipt_type"],
+      "type": ["object", "null"],
       "properties": {
-        "present": { "type": "boolean" },
-        "receipt_type": {
-          "type": "string",
-          "enum": ["none", "manual", "system_log", "signed", "hash_chain", "external_audit"]
+        "present": {
+          "type": "boolean"
         },
-        "timestamp": { "type": "string" },
-        "reference": { "type": "string" },
-        "downstream_effect_status": {
+        "type": {
           "type": "string",
-          "enum": ["blocked", "allowed", "unknown", "not_applicable"]
+          "enum": ["none", "manual", "system_log", "signed", "hash_chain", "external_audit", "refusal_receipt", "allow_receipt", "interruption_receipt"]
+        },
+        "reference": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
         }
       },
+      "required": ["present", "type", "reference", "timestamp"],
       "additionalProperties": false
     },
     "replay": {
-      "type": "object",
+      "type": ["object", "null"],
       "properties": {
-        "replayable": { "type": "boolean" },
-        "replay_reference": { "type": "string" },
-        "known_missing_inputs": {
-          "type": "array",
-          "items": { "type": "string" }
+        "present": {
+          "type": "boolean"
+        },
+        "fixture": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
         }
       },
+      "required": ["present"],
       "additionalProperties": false
     },
-    "limits": {
-      "type": "array",
-      "minItems": 1,
-      "items": { "type": "string", "minLength": 1 }
+    "downstream_effect": {
+      "type": ["object", "null"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["blocked", "allowed", "unknown", "not_applicable"]
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": ["status"],
+      "additionalProperties": false
     }
   },
   "additionalProperties": false
