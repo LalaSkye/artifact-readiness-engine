@@ -14,6 +14,8 @@ It currently has two inspection surfaces:
 ## Public Surface
 
 - [Public API Contract](docs/API.md)
+- [Changelog](docs/CHANGELOG.md)
+- [Roadmap](docs/ROADMAP.md)
 - CLI supports direct paths and `@id` references from `examples/manifest.json`
 - Python API is pinned at `0.2.0`
 
