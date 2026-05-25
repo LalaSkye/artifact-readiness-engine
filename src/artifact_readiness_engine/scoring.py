@@ -1,154 +1,113 @@
-"""Deterministic scoring rules v0.1.
+"""Deterministic scoring rules v0.1."""
+from __future__ import annotations
+from enum import Enum
+from typing import Tuple
 
-Rules are evaluated in order. First FAIL encountered stops the
-evaluation of that dimension — STRUCTURE_FIRST then FIRST_FAIL.
-"""
-
-from typing import List
-from .model import ProofPack, ScoredDimension
-
-BROAD_CLAIM_WORDS = {
-    "safe", "safety", "compliant", "compliance",
-    "governed", "governance", "secure", "security",
-    "trusted", "trust", "certified", "audited",
-}
-
-REFUSAL_CLAIM_TYPES = {"refusal", "interruption", "stop", "hold"}
+from .model import ProofPack
 
 
-def score_claim_boundedness(pack: ProofPack) -> ScoredDimension:
-    if not pack.claim:
-        return ScoredDimension("claim_boundedness", "FAIL", "No claim present.")
-    claim_lower = pack.claim.lower()
-    broad_hits = [w for w in BROAD_CLAIM_WORDS if w in claim_lower]
-    if broad_hits:
-        limits = pack.limits or {}
-        if not limits.get("scope"):
-            return ScoredDimension(
-                "claim_boundedness", "HOLD",
-                f"Claim contains broad word(s) {broad_hits} without explicit scope in limits."
-            )
-    return ScoredDimension("claim_boundedness", "PASS", "Claim is bounded.")
+class Score(str, Enum):
+    PASS = "PASS"
+    HOLD = "HOLD"
+    FAIL = "FAIL"
 
 
-def score_object_clarity(pack: ProofPack) -> ScoredDimension:
-    obj = pack.object_
-    if not obj:
-        return ScoredDimension("object_clarity", "FAIL", "No object defined.")
-    if not obj.get("id") or not obj.get("type"):
-        return ScoredDimension("object_clarity", "HOLD", "Object missing id or type.")
-    return ScoredDimension("object_clarity", "PASS", "Object is clearly identified.")
+# Words that flag an overbroad claim unless a tight scope is also present.
+_BROAD_WORDS = {"safe", "compliant", "governed", "secure", "trusted", "certified", "proven"}
+_REFUSAL_TYPES = {"refusal", "interruption"}
 
 
-def score_authority_trace(pack: ProofPack) -> ScoredDimension:
-    auth = pack.authority
-    if not auth:
-        return ScoredDimension("authority_trace", "HOLD", "No authority block present.")
-    if auth.get("type", "").lower() == "unknown":
-        return ScoredDimension("authority_trace", "HOLD", "Authority type is unknown.")
-    if not auth.get("type"):
-        return ScoredDimension("authority_trace", "HOLD", "Authority type not specified.")
-    return ScoredDimension("authority_trace", "PASS", "Authority is traceable.")
+def _score_claim_boundedness(pack: ProofPack) -> Tuple[Score, str]:
+    if not pack.claim_text:
+        return Score.FAIL, "No claim text found."
+    lower = pack.claim_text.lower()
+    hit = [w for w in _BROAD_WORDS if w in lower]
+    if hit and not pack.claim_limits:
+        return Score.HOLD, f"Broad word(s) detected ({', '.join(hit)}) with no explicit limits."
+    return Score.PASS, "Claim text is present and limits are declared."
 
 
-def score_condition_clarity(pack: ProofPack) -> ScoredDimension:
-    conditions = pack.conditions
-    if conditions is None:
-        return ScoredDimension("condition_clarity", "HOLD", "No conditions block present.")
-    for c in conditions:
-        if c.get("result", "").lower() == "unknown":
-            return ScoredDimension(
-                "condition_clarity", "HOLD",
-                f"Condition '{c.get('id', '?')}' result is unknown."
-            )
-    return ScoredDimension("condition_clarity", "PASS", "All conditions have known results.")
+def _score_object_clarity(pack: ProofPack) -> Tuple[Score, str]:
+    if not pack.object_id and not pack.object_description:
+        return Score.FAIL, "No object id or description found."
+    return Score.PASS, "Object is identified."
 
 
-def score_evidence_fit(pack: ProofPack) -> ScoredDimension:
-    evidence = pack.evidence
-    if evidence is None:
-        return ScoredDimension("evidence_fit", "FAIL", "Evidence array is missing entirely.")
-    if len(evidence) == 0:
-        return ScoredDimension("evidence_fit", "FAIL", "Evidence array is empty.")
-    for e in evidence:
-        if e.get("proves", "").lower() == "weaker_than_claim":
-            return ScoredDimension(
-                "evidence_fit", "HOLD",
-                f"Evidence item '{e.get('id', '?')}' proves a weaker claim than stated."
-            )
-    return ScoredDimension("evidence_fit", "PASS", "Evidence fits the claim.")
+def _score_authority_trace(pack: ProofPack) -> Tuple[Score, str]:
+    if not pack.authority:
+        return Score.HOLD, "No authority block found."
+    if pack.authority.get("type", "").lower() in ("", "unknown"):
+        return Score.HOLD, "Authority type is unknown."
+    if not pack.authority.get("reference", ""):
+        return Score.HOLD, "Authority reference is missing."
+    return Score.PASS, "Authority type and reference are present."
 
 
-def score_receipt_quality(pack: ProofPack) -> ScoredDimension:
-    receipt = pack.receipt
-    claim_type = (pack.claim_type or "").lower()
-    if receipt is None:
-        if claim_type in REFUSAL_CLAIM_TYPES:
-            return ScoredDimension(
-                "receipt_quality", "FAIL",
-                "Receipt is absent. Refusal/interruption claims require a receipt."
-            )
-        return ScoredDimension(
-            "receipt_quality", "HOLD",
-            "No receipt present. Cannot confirm claim was executed and recorded."
-        )
-    if receipt.get("present") is False:
-        return ScoredDimension(
-            "receipt_quality", "HOLD",
-            "Receipt marked present=false."
-        )
-    if claim_type in REFUSAL_CLAIM_TYPES:
-        if not receipt.get("downstream_effect_status"):
-            return ScoredDimension(
-                "receipt_quality", "HOLD",
-                "Receipt present but downstream_effect_status is missing for refusal claim."
-            )
-        if receipt.get("downstream_effect_status", "").lower() == "unknown":
-            return ScoredDimension(
-                "receipt_quality", "HOLD",
-                "Downstream effect status is unknown — path-blocked cannot be confirmed."
-            )
-    return ScoredDimension("receipt_quality", "PASS", "Receipt quality is sufficient.")
+def _score_condition_clarity(pack: ProofPack) -> Tuple[Score, str]:
+    if not pack.conditions:
+        return Score.HOLD, "No conditions listed."
+    unknown = [c.get("id", "?") for c in pack.conditions if c.get("result", "unknown") == "unknown"]
+    if unknown:
+        return Score.HOLD, f"Condition(s) with unknown result: {', '.join(unknown)}."
+    return Score.PASS, "All conditions have known results."
 
 
-def score_replayability(pack: ProofPack) -> ScoredDimension:
-    claim_type = (pack.claim_type or "").lower()
-    replay = pack.replay
-    if claim_type == "documentation":
-        return ScoredDimension("replayability", "PASS", "Replay not required for documentation claims.")
-    if not replay:
-        return ScoredDimension(
-            "replayability", "HOLD",
-            "No replay surface present. Cannot verify the claim is reproducible."
-        )
-    if not replay.get("fixture") and not replay.get("trace"):
-        return ScoredDimension(
-            "replayability", "HOLD",
-            "Replay block exists but contains no fixture or trace."
-        )
-    return ScoredDimension("replayability", "PASS", "Replay surface is present.")
+def _score_evidence_fit(pack: ProofPack) -> Tuple[Score, str]:
+    if not pack.evidence:
+        return Score.FAIL, "Evidence array is missing or empty."
+    unsupported = [e.get("id", "?") for e in pack.evidence if e.get("supports_claim") is False]
+    if unsupported:
+        return Score.HOLD, f"Evidence item(s) do not support the stated claim: {', '.join(unsupported)}."
+    return Score.PASS, "Evidence array is present and all items support the claim."
 
 
-def score_claim_limits(pack: ProofPack) -> ScoredDimension:
-    limits = pack.limits
-    if not limits:
-        return ScoredDimension("claim_limits", "FAIL", "No limits block present — claim boundary is undefined.")
-    if not limits.get("what_is_not_proven"):
-        return ScoredDimension(
-            "claim_limits", "HOLD",
-            "Limits block present but 'what_is_not_proven' is missing."
-        )
-    return ScoredDimension("claim_limits", "PASS", "Claim limits are explicitly stated.")
+def _score_receipt_quality(pack: ProofPack) -> Tuple[Score, str]:
+    if pack.receipt is None:
+        if pack.claim_type.lower() in _REFUSAL_TYPES:
+            return Score.FAIL, "Receipt is absent. Required for refusal/interruption claim types."
+        return Score.HOLD, "No receipt block found."
+    if not pack.receipt.get("present", False):
+        if pack.claim_type.lower() in _REFUSAL_TYPES:
+            return Score.HOLD, "Receipt present=false on a refusal/interruption claim."
+        return Score.HOLD, "Receipt present=false."
+    if not pack.receipt.get("reference", ""):
+        return Score.HOLD, "Receipt has no reference."
+    return Score.PASS, "Receipt is present with a valid reference."
 
 
-def run_all_scores(pack: ProofPack) -> List[ScoredDimension]:
-    return [
-        score_claim_boundedness(pack),
-        score_object_clarity(pack),
-        score_authority_trace(pack),
-        score_condition_clarity(pack),
-        score_evidence_fit(pack),
-        score_receipt_quality(pack),
-        score_replayability(pack),
-        score_claim_limits(pack),
-    ]
+def _score_replayability(pack: ProofPack) -> Tuple[Score, str]:
+    if pack.claim_type.lower() == "documentation":
+        return Score.PASS, "Replay not required for documentation claims."
+    if pack.replay is None or not pack.replay.get("present", False):
+        return Score.HOLD, "Replay surface is absent or marked not present."
+    return Score.PASS, "Replay surface is declared."
+
+
+def _score_claim_limits(pack: ProofPack) -> Tuple[Score, str]:
+    if not pack.claim_limits:
+        return Score.FAIL, "Claim limits are not declared."
+    return Score.PASS, "Claim limits are declared."
+
+
+_SCORERS = [
+    ("claim_boundedness", _score_claim_boundedness),
+    ("object_clarity", _score_object_clarity),
+    ("authority_trace", _score_authority_trace),
+    ("condition_clarity", _score_condition_clarity),
+    ("evidence_fit", _score_evidence_fit),
+    ("receipt_quality", _score_receipt_quality),
+    ("replayability", _score_replayability),
+    ("claim_limits", _score_claim_limits),
+]
+
+
+def run_all(pack: ProofPack) -> dict[str, Tuple[Score, str]]:
+    return {name: fn(pack) for name, fn in _SCORERS}
+
+
+_PRIORITY = {Score.FAIL: 0, Score.HOLD: 1, Score.PASS: 2}
+
+
+def overall(scores: dict[str, Tuple[Score, str]]) -> Score:
+    worst = min(scores.values(), key=lambda t: _PRIORITY[t[0]])
+    return worst[0]

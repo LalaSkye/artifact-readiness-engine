@@ -1,56 +1,61 @@
 {
-  "claim": "The system refused the binding instruction before execution.",
+  "claim_id": "refusal-001",
   "claim_type": "refusal",
+  "claim": {
+    "text": "The system refused a downstream mutation before binding, and this refusal was recorded.",
+    "limits": [
+      "Applies only to this specific mutation event on 2025-05-01",
+      "Does not claim system-wide refusal behaviour",
+      "Does not claim EU compliance"
+    ]
+  },
   "object": {
-    "id": "binding-instruction-42",
-    "type": "execution_instruction",
-    "version": "1.0"
+    "id": "mutation-event-2025-05-01-001",
+    "description": "A downstream mutation request rejected by the HOLD gate at pre-binding stage."
   },
   "authority": {
-    "type": "policy_rule",
-    "id": "ALVIAN-POLICY-v1.1",
-    "granted_by": "HUMAN"
+    "type": "policy",
+    "reference": "ALVIANTECH-POLICY-v1.1-section-3"
   },
   "conditions": [
     {
-      "id": "pre-binding-check",
-      "description": "Authority must be confirmed before mutation.",
+      "id": "condition-01",
+      "description": "Mutation request was received before binding.",
+      "result": "confirmed"
+    },
+    {
+      "id": "condition-02",
+      "description": "HOLD gate was active at time of request.",
       "result": "confirmed"
     }
   ],
   "evidence": [
     {
-      "id": "refusal-log-42",
-      "type": "system_log",
-      "description": "Log entry showing refusal event at T+0.",
-      "proves": "refusal_occurred"
+      "id": "evidence-01",
+      "type": "log",
+      "reference": "system-log-2025-05-01T10:22:00Z",
+      "supports_claim": true
     },
     {
-      "id": "policy-eval-trace-42",
-      "type": "policy_trace",
-      "description": "Policy evaluation trace confirming rule match.",
-      "proves": "policy_triggered"
+      "id": "evidence-02",
+      "type": "policy_evaluation_trace",
+      "reference": "eval-trace-2025-05-01-001",
+      "supports_claim": true
     }
   ],
   "receipt": {
     "present": true,
-    "id": "receipt-42",
-    "timestamp": "2026-05-25T03:00:00Z",
-    "downstream_effect_status": "path_blocked",
-    "signed_by": "TRINITY-v1"
+    "type": "refusal_receipt",
+    "reference": "receipt-2025-05-01-001",
+    "timestamp": "2025-05-01T10:22:01Z"
   },
   "replay": {
-    "fixture": "fixtures/refusal-42.json",
-    "trace": "traces/policy-eval-42.log"
+    "present": true,
+    "fixture": "tests/fixtures/refusal-001-replay.json",
+    "notes": "Replay fixture reproduces the pre-binding HOLD condition."
   },
-  "limits": {
-    "scope": "single binding instruction, single execution attempt",
-    "what_is_not_proven": [
-      "EU AI Act compliance",
-      "legal sufficiency",
-      "full system safety",
-      "production readiness",
-      "court outcome"
-    ]
+  "downstream_effect": {
+    "status": "blocked",
+    "description": "No downstream mutation occurred. Path confirmed closed."
   }
 }

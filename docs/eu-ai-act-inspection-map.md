@@ -1,50 +1,47 @@
-# EU AI Act — Proof Structure Inspection Mapping
+# EU AI Act → Engine Inspection Surface Map
 
-> **Scope note**: This document maps the inspection engine's surfaces
-> against EU AI Act pressure points. It does **not** certify compliance,
-> legal sufficiency, or audit readiness. It is a structural reference only.
-
----
-
-## How to Read This Map
-
-Each row shows:
-- The EU AI Act article or annex that creates a governance pressure
-- The inspection engine surface(s) that are *relevant* to that pressure
-- What kind of gap the engine can detect
-
-The engine can tell you whether a proof structure is *inspectable*.
-It cannot tell you whether it *satisfies* a regulator.
+> This map is a structural reference only.  
+> The engine does **not** certify EU AI Act compliance.  
+> It maps where governance pressure exists so you can see which proof surfaces matter.
 
 ---
 
-## Mapping Table
+## Pressure Point → Engine Surface
 
-| EU AI Act Reference | What It Requires | Engine Surface | Detectable Gap |
-|---|---|---|---|
-| **Art. 9** — Risk management system | Ongoing identification, analysis, and mitigation of risks | `conditions` / `evidence` / `limits` | Missing conditions, unknown results, absent limits |
-| **Art. 11** — Technical documentation | Documentation of system design, capabilities, and limitations | `object` / `claim` / `evidence` | Unclear object, missing evidence, unbounded claim |
-| **Art. 12** — Record-keeping / automatic logs | Logs generated automatically throughout lifecycle | `receipt` / `replay` | Absent receipt, no replay trace, unknown downstream effect |
-| **Art. 14** — Human oversight | Humans able to monitor, interpret, override, and stop | `authority` / `receipt` / `replay` | Unknown authority type, no intervention record |
-| **Art. 17** — Quality management system | Documented processes for design, development, testing | `authority` / `conditions` / `evidence` | Missing authority trace, undocumented process evidence |
-| **Art. 18** — Documentation keeping | Records retained and accessible to regulators | `receipt` / `limits` | No receipt, no explicit scope or exclusion statement |
-| **Art. 72** — Post-market monitoring | Ongoing monitoring after deployment | `replay` / `receipt` | No replay surface, no incident trace, no lifecycle evidence |
-| **Annex IV** — Technical documentation contents | Specific required documentation fields | `object` / `claim` / `evidence` / `limits` | Missing fields, overbroad claim, absent what-is-not-proven |
-| **Annex VII** — Conformity via quality mgmt + tech docs | Internal quality management + documentation match | Full chain: all eight dimensions | Any FAIL or unresolved HOLD |
-
----
-
-## What This Engine Cannot Do
-
-- It cannot determine whether documentation *meets* regulatory standard
-- It cannot substitute for legal counsel or an accredited audit body
-- It cannot assess system behaviour — only the proof structure submitted
-- It cannot certify, approve, or clear any system for deployment
+| EU AI Act Reference | Subject | Engine Surface(s) |
+|---------------------|---------|--------------------|
+| Article 9 | Risk management system | `conditions`, `evidence`, `claim_limits` |
+| Article 11 | Technical documentation | `object`, `claim`, `evidence` |
+| Article 12 | Record-keeping / automatic logs | `receipt`, `authority` (trace) |
+| Article 14 | Human oversight | `authority`, `conditions` (intervention record) |
+| Article 17 | Quality management system | `authority`, `evidence` (process evidence) |
+| Article 18 | Documentation keeping | `object`, `receipt`, `replay` |
+| Article 72 | Post-market monitoring | `replay`, `downstream_effect`, `evidence` (incident trace) |
+| Annex IV | Technical documentation contents | All surfaces — full chain required |
+| Annex VII | Conformity assessment (QMS + docs) | `report`, `authority`, `receipt`, `replay` |
 
 ---
 
-## Stop Line
+## What this means in practice
 
-A proof object should prove the claim attached to it — not less, not everything.
+### Article 9 (Risk management)
+A risk management system requires documented conditions under which the system is safe to operate. Map your risk thresholds to `conditions`. If any condition result is `unknown`, the engine returns HOLD — risk management is incomplete.
 
-The engine checks whether the structure is there. Whether it is *enough* is a human decision.
+### Article 11 (Technical documentation)
+Documentation must describe what the system does and how it was built. The `object` block and `evidence` array are the closest proof-pack equivalents. Missing object description → FAIL.
+
+### Article 12 (Record-keeping / logs)
+Automatic logs must be kept for high-risk AI systems. The `receipt` block represents this: a timestamped, referenced record of what happened. Missing receipt on a refusal/interruption claim → FAIL.
+
+### Article 14 (Human oversight)
+Human oversight requires that a human can intervene. The `authority` block must reference a human or human-approved policy. Authority type `unknown` → HOLD.
+
+### Article 72 (Post-market monitoring)
+Post-market monitoring requires ongoing incident tracking. The `replay` surface and `downstream_effect` block are your closest equivalents. Missing replay → HOLD (unless documentation claim type).
+
+### Annex IV (Technical documentation contents)
+All eight proof-pack surfaces must be populated for documentation that could support Annex IV requirements.
+
+---
+
+*This map is for structural orientation only. It is not legal advice and does not constitute an EU AI Act compliance assessment.*

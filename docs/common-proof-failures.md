@@ -1,113 +1,108 @@
 # Common Proof Failures
 
-The most frequent mistakes that cause proof packs to fail structural inspection.
-
-None of these failures mean the underlying system is unsafe.
-They mean the proof structure cannot support the claim attached to it.
+> These are the most frequent reasons a proof pack returns HOLD or FAIL.  
+> Each failure describes what was submitted, why it does not work, and what to do instead.
 
 ---
 
-## 1. Policy Treated as Proof
+## 1. Policy treated as proof
 
-**What happens**: A policy document is listed as evidence that a behaviour occurred.
+**What happens**: The authority block references a policy document. The claim says "the system followed policy X".
 
-**Why it fails**: Policy says what *should* happen. Evidence must show what *did* happen.
-A written rule is not a proof of execution.
+**Why it fails**: A policy is a statement of intent. It is not evidence that the policy was followed in this specific event. A policy reference belongs in `authority`. The evidence that the policy was applied belongs in `evidence`.
 
-**Fix**: Add system logs, execution traces, or evaluation records that show the policy was triggered and its outcome.
-
----
-
-## 2. Dashboard Treated as Interruption
-
-**What happens**: A monitoring dashboard screenshot is submitted as proof that an AI action was stopped.
-
-**Why it fails**: A dashboard shows current state. It does not prove a specific event occurred at a specific time, or that a downstream path was blocked.
-
-**Fix**: Provide a timestamped log entry, a refusal receipt, and a downstream effect status.
+**Fix**: Add an `evaluation_trace` or `decision_log` to `evidence` that shows the policy was evaluated at the time of the event.
 
 ---
 
-## 3. Log Treated as Receipt
+## 2. Dashboard treated as interruption evidence
 
-**What happens**: A raw system log is submitted as a receipt.
+**What happens**: Evidence points to a monitoring dashboard screenshot.
 
-**Why it fails**: A log is a record. A receipt is a confirmed acknowledgement that a specific event occurred and was registered — ideally signed, timestamped, and linked to a specific claim.
+**Why it fails**: A dashboard shows a state at a point in time. It does not prove that a specific interruption occurred, when it occurred, or what path was blocked.
 
-**Fix**: Generate a dedicated receipt object with `id`, `timestamp`, `downstream_effect_status`, and optionally `signed_by`.
-
----
-
-## 4. Human Oversight Without Authority
-
-**What happens**: A proof pack claims human oversight but the authority block is absent or type is unknown.
-
-**Why it fails**: Oversight without traceable authority is not inspectable. The engine cannot confirm that the right human, with the right authority, was involved.
-
-**Fix**: Add an authority block with `type`, `id`, and `granted_by`.
+**Fix**: Add a timestamped event log or interruption record to `evidence`. The dashboard may be supplementary, not primary.
 
 ---
 
-## 5. Broad Claim With Narrow Evidence
+## 3. Log treated as receipt
 
-**What happens**: The claim says the system is "safe", "compliant", or "trusted". The evidence shows one log entry from one test run.
+**What happens**: `receipt` references a system log file.
 
-**Why it fails**: The evidence proves a specific, bounded event. The claim implies a universal property. The engine flags this as a claim-evidence mismatch.
+**Why it fails**: A log is a continuous record. A receipt is a discrete, signed acknowledgement of a specific event. Logs can be amended; receipts are immutable by definition.
 
-**Fix**: Either narrow the claim to match the evidence ("The system refused binding instruction #42") or provide evidence sufficient to support the broad claim.
-
----
-
-## 6. Refusal Declared but Downstream Path Not Proven Blocked
-
-**What happens**: The claim is "the system refused an instruction" but the receipt has no `downstream_effect_status`, or it is `unknown`.
-
-**Why it fails**: Refusing an instruction is only meaningful if the downstream path was actually blocked. Without evidence the path was closed, the refusal may not have had effect.
-
-**Fix**: Add `downstream_effect_status: "path_blocked"` to the receipt, with supporting evidence.
+**Fix**: Generate a dedicated receipt at the point of the event — a hash-stamped, timestamped record tied to the specific claim event.
 
 ---
 
-## 7. No Replay Surface
+## 4. Human oversight declared without authority
 
-**What happens**: A claim is made but no fixture or trace exists that would allow the event to be replayed or independently verified.
+**What happens**: A condition says "human oversight was present". The authority block is empty.
 
-**Why it fails**: Without a replay surface, a reviewer cannot verify the claim occurred as described. It is a closed proof — trust without verifiability.
+**Why it fails**: Human oversight requires a named human or human-approved policy as authority. Without a reference, the oversight claim cannot be inspected or replayed.
 
-**Fix**: Add a `replay` block with a `fixture` (input state) and/or `trace` (execution log).
-
----
-
-## 8. No Claim Limit
-
-**What happens**: The proof pack has no `limits` block, or the `what_is_not_proven` field is absent.
-
-**Why it fails**: Without explicit limits, the claim boundary is undefined. A reviewer cannot know what the pack *is not* claiming. This creates overclaim risk.
-
-**Fix**: Add a `limits` block. State the scope explicitly. List at minimum: EU AI Act compliance, legal sufficiency, full system safety.
+**Fix**: Populate `authority` with the specific human role or policy that granted oversight. Add an escalation record to `evidence`.
 
 ---
 
-## 9. No Chain of Custody
+## 5. Broad claim with narrow evidence
 
-**What happens**: Evidence items have no `id`, no `type`, and no link back to the claim or object.
+**What happens**: The claim says "the system is safe for production use". Evidence covers one test case.
 
-**Why it fails**: Evidence must be traceable — from the claim, to the object, to the evidence item, to the source. Without chain of custody, the evidence cannot be audited.
+**Why it fails**: The evidence proves a narrow claim (this test passed). The stated claim is broad (system-wide safety). The engine will return HOLD on `evidence_fit`.
 
-**Fix**: Give every evidence item a unique `id`, a `type`, and a `proves` field describing what specific sub-claim it supports.
-
----
-
-## 10. No Version or Policy Reference
-
-**What happens**: Evidence or authority blocks reference unnamed or unversioned policies.
-
-**Why it fails**: If the policy changed between the event and the inspection, the proof becomes ambiguous. The engine cannot confirm which version was active.
-
-**Fix**: Include version identifiers in authority and evidence blocks (e.g., `"id": "ALVIAN-POLICY-v1.1"`).
+**Fix**: Reduce the claim to match the evidence, OR add evidence that supports the broader claim.
 
 ---
 
-## Stop Line
+## 6. Refusal declared but downstream path not proven blocked
 
-A proof object should prove the claim attached to it — not less, not everything.
+**What happens**: The claim says a mutation was refused. `downstream_effect` is absent or status is `unknown`.
+
+**Why it fails**: A refusal claim requires proof that the downstream path was actually closed — not just that a HOLD was issued.
+
+**Fix**: Populate `downstream_effect` with status `blocked` and a description of how closure was confirmed.
+
+---
+
+## 7. No replay surface
+
+**What happens**: `replay` is absent or `present: false`.
+
+**Why it fails**: Without a replay fixture, the claim cannot be independently reproduced. It is a one-time assertion, not an inspectable proof.
+
+**Fix**: Create a replay fixture that reproduces the conditions of the claim event. Reference it in the `replay` block.
+
+---
+
+## 8. No claim limit
+
+**What happens**: `claim.limits` is empty.
+
+**Why it fails**: An unlimited claim is an infinite claim. The engine cannot assess fit between evidence and claim if the claim has no boundary.
+
+**Fix**: Add at least one explicit limit: scope, time range, event ID, or system boundary.
+
+---
+
+## 9. No chain of custody
+
+**What happens**: Evidence references exist but do not link back to the claim event via timestamps, IDs, or version references.
+
+**Why it fails**: Without a chain of custody, evidence could belong to a different event. The inspector cannot verify continuity.
+
+**Fix**: Each evidence item must include a reference that ties it to the specific claim event (event ID, timestamp range, policy version).
+
+---
+
+## 10. No version or policy reference
+
+**What happens**: The authority block has a type but no reference, or the reference is generic (e.g., "internal policy").
+
+**Why it fails**: A policy that cannot be versioned cannot be inspected. If the policy changed after the event, the reference is meaningless.
+
+**Fix**: Include the specific policy version and section number in `authority.reference`.
+
+---
+
+*The stop line: a proof object should prove the claim attached to it — not less, not everything.*

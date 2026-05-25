@@ -1,20 +1,19 @@
-"""Test: FAIL when claim is overbroad and limits are absent."""
+"""Test: FAIL on an overbroad claim with no evidence and no limits."""
+from src.artifact_readiness_engine.inspector import inspect_file
 
-from pathlib import Path
-from artifact_readiness_engine import inspect_proof_pack
-
-
-FAIL_FIXTURE = Path("examples/fail/overbroad-claim.json")
+FAIL_FILE = "examples/fail/overbroad-claim.json"
 
 
-def test_fail_overall():
-    result = inspect_proof_pack(FAIL_FIXTURE)
-    assert result.overall_status == "FAIL", (
-        f"Expected FAIL, got {result.overall_status}"
-    )
+def test_fail_overbroad_status():
+    result = inspect_file(FAIL_FILE)
+    assert result["status"] == "FAIL", f"Expected FAIL, got {result['status']}"
 
 
-def test_evidence_or_limits_fail():
-    result = inspect_proof_pack(FAIL_FIXTURE)
-    fail_dims = {d.name for d in result.dimensions if d.status == "FAIL"}
-    assert fail_dims, "Expected at least one FAIL dimension"
+def test_fail_overbroad_evidence_fit_fails():
+    result = inspect_file(FAIL_FILE)
+    assert result["scores"]["evidence_fit"]["result"] == "FAIL"
+
+
+def test_fail_overbroad_claim_limits_fails():
+    result = inspect_file(FAIL_FILE)
+    assert result["scores"]["claim_limits"]["result"] == "FAIL"

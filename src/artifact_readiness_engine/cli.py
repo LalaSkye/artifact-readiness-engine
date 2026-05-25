@@ -1,52 +1,43 @@
-"""CLI entry point for the artifact readiness engine."""
-
+"""CLI entry point for the Proof Structure Inspector."""
+from __future__ import annotations
 import argparse
 import sys
 
-from .inspector import inspect_proof_pack
-from .report import render_text, render_json
+from .inspector import inspect_file
+from .report import format_text, format_json
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         prog="artifact-readiness",
-        description=(
-            "Proof Structure Inspection Mode — checks whether a governance "
-            "artefact can support a bounded claim. Does NOT certify compliance, "
-            "safety, legality, or production readiness."
-        ),
+        description="Proof Structure Inspector — checks whether a proof pack supports a bounded claim.",
     )
-    subparsers = parser.add_subparsers(dest="command")
+    sub = parser.add_subparsers(dest="command", required=True)
 
-    inspect_parser = subparsers.add_parser(
-        "inspect", help="Inspect a proof pack JSON file."
-    )
-    inspect_parser.add_argument("proof_pack", help="Path to proof-pack JSON file.")
-    inspect_parser.add_argument(
+    inspect_cmd = sub.add_parser("inspect", help="Inspect a proof-pack JSON file.")
+    inspect_cmd.add_argument("file", help="Path to proof-pack JSON")
+    inspect_cmd.add_argument(
         "--format",
         choices=["text", "json"],
         default="text",
-        help="Output format (default: text).",
+        help="Output format (default: text)",
     )
 
     args = parser.parse_args()
 
     if args.command == "inspect":
-        result = inspect_proof_pack(args.proof_pack)
-        if args.format == "json":
-            print(render_json(result))
-        else:
-            print(render_text(result))
-        # Exit with non-zero if not PASS
-        if result.overall_status == "PASS":
-            sys.exit(0)
-        elif result.overall_status == "HOLD":
-            sys.exit(1)
-        else:
+        try:
+            result = inspect_file(args.file)
+        except FileNotFoundError:
+            print(f"Error: file not found — {args.file}", file=sys.stderr)
             sys.exit(2)
-    else:
-        parser.print_help()
-        sys.exit(0)
+        except Exception as exc:  # noqa: BLE001
+            print(f"Error: {exc}", file=sys.stderr)
+            sys.exit(2)
+
+        output = format_json(result) if args.format == "json" else format_text(result)
+        print(output)
+        sys.exit(0 if result["status"] == "PASS" else 1)
 
 
 if __name__ == "__main__":

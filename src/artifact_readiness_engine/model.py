@@ -1,65 +1,49 @@
-"""Data models for proof packs and inspection results."""
-
+"""Data model for a proof-pack submission."""
+from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Any
+from typing import Any, List, Optional
 
 
 @dataclass
 class ProofPack:
-    """Parsed representation of a submitted proof-pack JSON."""
-    raw: Dict[str, Any]
+    """Parsed representation of a proof-pack JSON file."""
+    raw: dict = field(repr=False)
 
-    @property
-    def claim(self) -> Optional[str]:
-        return self.raw.get("claim")
+    # Top-level fields
+    claim_id: str = ""
+    claim_type: str = ""          # e.g. refusal / interruption / documentation / observation
+    claim_text: str = ""
+    claim_limits: List[str] = field(default_factory=list)
 
-    @property
-    def claim_type(self) -> Optional[str]:
-        return self.raw.get("claim_type")
+    object_id: str = ""
+    object_description: str = ""
 
-    @property
-    def object_(self) -> Optional[Dict]:
-        return self.raw.get("object")
+    authority: dict = field(default_factory=dict)  # {type, reference}
 
-    @property
-    def authority(self) -> Optional[Dict]:
-        return self.raw.get("authority")
+    conditions: List[dict] = field(default_factory=list)  # [{id, description, result}]
 
-    @property
-    def conditions(self) -> Optional[List]:
-        return self.raw.get("conditions")
+    evidence: List[dict] = field(default_factory=list)    # [{id, type, reference, supports_claim}]
 
-    @property
-    def evidence(self) -> Optional[List]:
-        return self.raw.get("evidence")
+    receipt: Optional[dict] = None  # {present, type, reference, timestamp}
 
-    @property
-    def receipt(self) -> Optional[Dict]:
-        return self.raw.get("receipt")
+    replay: Optional[dict] = None   # {present, fixture, notes}
 
-    @property
-    def replay(self) -> Optional[Dict]:
-        return self.raw.get("replay")
+    downstream_effect: Optional[dict] = None  # {status, description}
 
-    @property
-    def limits(self) -> Optional[Dict]:
-        return self.raw.get("limits")
-
-
-@dataclass
-class ScoredDimension:
-    name: str
-    status: str  # PASS | HOLD | FAIL
-    reason: str
-
-
-@dataclass
-class InspectionResult:
-    file_path: str
-    overall_status: str  # PASS | HOLD | FAIL
-    dimensions: List[ScoredDimension] = field(default_factory=list)
-    strongest_supported_claim: str = ""
-    stated_claim: str = ""
-    key_issue: str = ""
-    next_action: str = ""
-    unsupported_claims: List[str] = field(default_factory=list)
+    @classmethod
+    def from_dict(cls, data: dict) -> "ProofPack":
+        return cls(
+            raw=data,
+            claim_id=data.get("claim_id", ""),
+            claim_type=data.get("claim_type", ""),
+            claim_text=data.get("claim", {}).get("text", "") if isinstance(data.get("claim"), dict) else data.get("claim_text", ""),
+            claim_limits=data.get("claim", {}).get("limits", []) if isinstance(data.get("claim"), dict) else data.get("claim_limits", []),
+            object_id=data.get("object", {}).get("id", "") if isinstance(data.get("object"), dict) else "",
+            object_description=data.get("object", {}).get("description", "") if isinstance(data.get("object"), dict) else "",
+            authority=data.get("authority", {}),
+            conditions=data.get("conditions", []),
+            evidence=data.get("evidence", []),
+            receipt=data.get("receipt"),
+            replay=data.get("replay"),
+            downstream_effect=data.get("downstream_effect"),
+        )

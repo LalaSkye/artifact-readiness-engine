@@ -1,15 +1,27 @@
 {
-  "claim": "This system is safe, compliant, and trusted for all governance operations.",
-  "claim_type": "governance_assertion",
+  "claim_id": "broad-001",
+  "claim_type": "documentation",
+  "claim": {
+    "text": "This system is fully compliant, secure, and trusted for all production use cases.",
+    "limits": []
+  },
   "object": {
-    "id": "trinityos-core",
-    "type": "system",
-    "version": "1.0"
+    "id": "system-v1",
+    "description": "Generic system description without specific scope."
   },
   "authority": {
-    "type": "policy_rule",
-    "id": "ALVIAN-POLICY-v1.1"
+    "type": "unknown",
+    "reference": ""
   },
-  "conditions": [],
-  "limits": null
+  "conditions": [
+    {
+      "id": "condition-01",
+      "description": "System has been reviewed.",
+      "result": "unknown"
+    }
+  ],
+  "evidence": [],
+  "receipt": null,
+  "replay": null,
+  "downstream_effect": null
 }
