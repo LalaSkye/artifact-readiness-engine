@@ -1,5 +1,6 @@
 """Deterministic scoring rules v0.1."""
 from __future__ import annotations
+
 from enum import Enum
 from typing import Tuple
 
@@ -12,7 +13,6 @@ class Score(str, Enum):
     FAIL = "FAIL"
 
 
-# Words that flag an overbroad claim unless a tight scope is also present.
 _BROAD_WORDS = {"safe", "compliant", "governed", "secure", "trusted", "certified", "proven"}
 _REFUSAL_TYPES = {"refusal", "interruption"}
 
@@ -83,6 +83,19 @@ def _score_replayability(pack: ProofPack) -> Tuple[Score, str]:
     return Score.PASS, "Replay surface is declared."
 
 
+def _score_downstream_effect(pack: ProofPack) -> Tuple[Score, str]:
+    if pack.claim_type.lower() not in _REFUSAL_TYPES:
+        return Score.PASS, "Downstream block is not required for this claim type."
+    if pack.downstream_effect is None:
+        return Score.HOLD, "Downstream effect block is absent for a refusal/interruption claim."
+    status = pack.downstream_effect.get("status", "unknown")
+    if status == "blocked":
+        return Score.PASS, "Downstream effect is marked blocked."
+    if status == "unknown":
+        return Score.HOLD, "Downstream effect status is unknown; refusal effect is not proven."
+    return Score.HOLD, f"Downstream effect status is {status}; refusal effect is not proven blocked."
+
+
 def _score_claim_limits(pack: ProofPack) -> Tuple[Score, str]:
     if not pack.claim_limits:
         return Score.FAIL, "Claim limits are not declared."
@@ -97,6 +110,7 @@ _SCORERS = [
     ("evidence_fit", _score_evidence_fit),
     ("receipt_quality", _score_receipt_quality),
     ("replayability", _score_replayability),
+    ("downstream_effect", _score_downstream_effect),
     ("claim_limits", _score_claim_limits),
 ]
 
