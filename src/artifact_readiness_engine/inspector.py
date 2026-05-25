@@ -5,13 +5,21 @@ import json
 from pathlib import Path
 from typing import Union
 
+from .manifest import resolve_proof_pack_reference
 from .model import ProofPack
-from .scoring import run_all, overall
+from .scoring import overall, run_all
 from .validation import validate_proof_pack
 
 
 def inspect_file(path: Union[str, Path]) -> dict:
-    """Load, validate, score, and report on a proof-pack JSON file."""
+    """Load, validate, score, and report on a proof-pack JSON file.
+
+    Args:
+        path: Direct path to a proof-pack JSON file.
+
+    Returns:
+        A deterministic inspection report dictionary.
+    """
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     validate_proof_pack(data)
 
@@ -41,6 +49,19 @@ def inspect_file(path: Union[str, Path]) -> dict:
         "issues": failing,
         "strongest_supported_claim": _derive_strongest(pack, scores),
     }
+
+
+def inspect_by_id(entry_id: str) -> dict:
+    """Inspect a proof-pack registered in examples/manifest.json by id.
+
+    Args:
+        entry_id: Manifest id with or without leading '@'.
+
+    Returns:
+        A deterministic inspection report dictionary.
+    """
+    reference = entry_id if entry_id.startswith("@") else f"@{entry_id}"
+    return inspect_file(resolve_proof_pack_reference(reference))
 
 
 def _derive_strongest(pack: ProofPack, scores: dict) -> str:
