@@ -67,10 +67,11 @@ Current state:
 - The engine can show structural inspectability.
 - It cannot certify compliance, safety, legality, or production readiness.
 - `docs/EVIDENCE_MODEL.md` describes what each score proves and does not prove.
+- `docs/EU_AI_ACT_MAPPING.md` maps engine surfaces to EU AI Act structural pressure points without making a compliance claim.
 
 Next milestone:
 
-- Add `docs/EU_AI_ACT_MAPPING.md` as a claim-bounded structural map, not a compliance claim.
+- Add independent reviewer guide for using reports without inflating them into certification claims.
 
 ---
 
