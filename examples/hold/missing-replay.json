@@ -1,0 +1,39 @@
+{
+  "claim": "The system refused the binding instruction before execution.",
+  "claim_type": "refusal",
+  "object": {
+    "id": "binding-instruction-99",
+    "type": "execution_instruction",
+    "version": "1.0"
+  },
+  "authority": {
+    "type": "policy_rule",
+    "id": "ALVIAN-POLICY-v1.1",
+    "granted_by": "HUMAN"
+  },
+  "conditions": [
+    {
+      "id": "pre-binding-check",
+      "description": "Authority must be confirmed before mutation.",
+      "result": "confirmed"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "refusal-log-99",
+      "type": "system_log",
+      "description": "Log entry showing refusal event.",
+      "proves": "refusal_occurred"
+    }
+  ],
+  "receipt": {
+    "present": true,
+    "id": "receipt-99",
+    "timestamp": "2026-05-25T03:10:00Z",
+    "downstream_effect_status": "path_blocked"
+  },
+  "limits": {
+    "scope": "single binding instruction",
+    "what_is_not_proven": ["EU AI Act compliance", "legal sufficiency"]
+  }
+}

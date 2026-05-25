@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "artifact-readiness-engine"
+version = "0.1.0"
+description = "Proof Structure Inspection Mode — pre-audit inspection surface for governance artefacts."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["governance", "ai", "proof", "inspection", "alviantech"]
+dependencies = []
+
+[project.scripts]
+artifact-readiness = "artifact_readiness_engine.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

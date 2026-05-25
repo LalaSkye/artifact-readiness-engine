@@ -1,0 +1,15 @@
+{
+  "claim": "This system is safe, compliant, and trusted for all governance operations.",
+  "claim_type": "governance_assertion",
+  "object": {
+    "id": "trinityos-core",
+    "type": "system",
+    "version": "1.0"
+  },
+  "authority": {
+    "type": "policy_rule",
+    "id": "ALVIAN-POLICY-v1.1"
+  },
+  "conditions": [],
+  "limits": null
+}
