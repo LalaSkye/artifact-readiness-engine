@@ -16,6 +16,7 @@ It currently has two inspection surfaces:
 - [Public API Contract](docs/API.md)
 - [Evidence Model](docs/EVIDENCE_MODEL.md)
 - [EU AI Act Structural Mapping](docs/EU_AI_ACT_MAPPING.md)
+- [Independent Reviewer Guide](docs/REVIEWER_GUIDE.md)
 - [Changelog](docs/CHANGELOG.md)
 - [Roadmap](docs/ROADMAP.md)
 - CLI supports direct paths and `@id` references from `examples/manifest.json`
