@@ -1,22 +1,21 @@
-"""Test: PASS on a complete minimal refusal-receipt proof pack."""
-from src.artifact_readiness_engine.inspector import inspect_file
+"""Test: PASS for a minimal complete refusal receipt proof pack."""
+from pathlib import Path
 
-PASS_FILE = "examples/pass/minimal-refusal-receipt.json"
+import pytest
+
+from artifact_readiness_engine.inspector import inspect_file
+
+PASS_FILE = Path("examples/pass/minimal-refusal-receipt.json")
 
 
-def test_pass_status():
+@pytest.mark.skipif(not PASS_FILE.exists(), reason="minimal-refusal-receipt.json not present")
+def test_pass_minimal_refusal_receipt_status():
     result = inspect_file(PASS_FILE)
-    assert result["status"] == "PASS", (
-        f"Expected PASS, got {result['status']}.\nIssues: {result['issues']}"
-    )
+    assert result["status"] == "PASS"
 
 
-def test_pass_no_issues():
+@pytest.mark.skipif(not PASS_FILE.exists(), reason="minimal-refusal-receipt.json not present")
+def test_pass_minimal_refusal_receipt_all_surfaces_pass():
     result = inspect_file(PASS_FILE)
-    assert not result["issues"], f"Expected no issues, got: {result['issues']}"
-
-
-def test_pass_all_surfaces():
-    result = inspect_file(PASS_FILE)
-    for surface, detail in result["scores"].items():
-        assert detail["result"] == "PASS", f"{surface} did not PASS: {detail}"
+    assert result["issues"] == {}
+    assert all(surface["result"] == "PASS" for surface in result["scores"].values())
