@@ -28,6 +28,7 @@ Quickstart:
 pip install -e .
 artifact-readiness inspect @pass-minimal-refusal-receipt
 artifact-readiness validate @fail-overbroad-claim
+artifact-readiness verify-report examples/reports/pass-minimal-refusal-receipt.report.json
 artifact-readiness manifest --check
 ```
 
@@ -84,6 +85,21 @@ Scores:
 - downstream_effect
 - claim_limits
 ```
+
+### Receipt digest verification
+
+Golden inspection reports carry a self-verifying `report_digest`.
+
+```bash
+artifact-readiness verify-report examples/reports/pass-minimal-refusal-receipt.report.json
+artifact-readiness verify-report examples/reports/hold-missing-receipt.report.json --format json
+```
+
+`verify-report` returns:
+
+- `0` when the stored digest verifies
+- `1` when the digest mismatches
+- `2` for file, parsing, or runtime errors
 
 ### States
 
@@ -152,7 +168,7 @@ This is a readiness check at the execution boundary.
 
 ## Status
 
-v0.2.0 — proof-structure inspection engine, CLI, manifest registry, golden reports, and public Python API.
+v0.2.0 — proof-structure inspection engine, CLI, manifest registry, golden reports, report digest verification, and public Python API.
 
 ---
 
