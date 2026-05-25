@@ -10,6 +10,31 @@ This project follows a semantic-versioning style:
 
 ---
 
+## v0.2.x
+
+Status: digest receipt layer complete.
+
+### Added
+
+- Report digest support for golden inspection reports.
+- `report_digest` field using SHA-256 over canonical JSON excluding the digest field itself.
+- Digest utility functions:
+  - `compute_report_sha256`
+  - `attach_report_digest`
+  - `verify_report_digest`
+- CLI command:
+  - `artifact-readiness verify-report <report.json>`
+- JSON output for report verification.
+- Tamper-detection tests for digest mismatch.
+- Documentation for report digest verification in README and API contract.
+
+### Guardrails
+
+- Digest verification proves report-file integrity against the stored digest.
+- Digest verification does not prove legal sufficiency, compliance, safety, independent audit approval, or truth of the underlying claim.
+
+---
+
 ## v0.2.0
 
 Status: current public API surface.
