@@ -11,6 +11,34 @@ It currently has two inspection surfaces:
 
 ---
 
+## Public Surface
+
+- [Public API Contract](docs/API.md)
+- CLI supports direct paths and `@id` references from `examples/manifest.json`
+- Python API is pinned at `0.2.0`
+
+Quickstart:
+
+```bash
+pip install -e .
+artifact-readiness inspect @pass-minimal-refusal-receipt
+artifact-readiness validate @fail-overbroad-claim
+artifact-readiness manifest --check
+```
+
+Python:
+
+```python
+from artifact_readiness_engine import inspect_by_id, validate_file, load_manifest
+
+report = inspect_by_id("@pass-minimal-refusal-receipt")
+assert report["status"] == "PASS"
+assert validate_file("@pass-minimal-refusal-receipt") is True
+entries = load_manifest()
+```
+
+---
+
 ## Proof Structure Inspection Mode
 
 This mode is a pre-audit inspection surface.
@@ -33,14 +61,6 @@ Claim
 → Replay
 → Downstream Effect
 → Limit
-```
-
-### Run
-
-```bash
-pip install -e .
-artifact-readiness inspect examples/pass/minimal-refusal-receipt.json
-artifact-readiness inspect examples/hold/missing-receipt.json --format json
 ```
 
 ### Output
@@ -127,7 +147,7 @@ This is a readiness check at the execution boundary.
 
 ## Status
 
-v0.1 — proof-structure inspection engine + manual repo-readiness concept.
+v0.2.0 — proof-structure inspection engine, CLI, manifest registry, golden reports, and public Python API.
 
 ---
 
